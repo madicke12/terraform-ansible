@@ -1,0 +1,25 @@
+
+- name: Déploiement complet de l'application sur Kubernetes
+  hosts: localhost
+  gather_facts: false
+
+  vars_files:
+    - ../secrets/k8s-secrets.yaml
+
+  roles:
+    - postgres
+    - backend
+    - frontend
+
+  tasks:
+    - name: Déployer les services (backend et frontend)
+      kubernetes.core.k8s:
+        kubeconfig: ~/.kube/config
+        state: present
+        definition: "{{ lookup('file', './manifests/services.yaml') }}"
+
+    - name: Déployer l'ingress
+      kubernetes.core.k8s:
+        kubeconfig: ~/.kube/config
+        state: present
+        definition: "{{ lookup('template', './manifests/ingress.yaml') }}"
