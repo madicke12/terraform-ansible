@@ -6,3 +6,4 @@ terraform/terraform.tfvars
 terraform/terraform.tfvars.json
 terraform/terraform.tfvars.example  
 
+terraform/venv

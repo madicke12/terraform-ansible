@@ -1,7 +1,7 @@
 namespace_: fullstack-app
-postgres_user: odc
-postgres_password: odc123
-postgres_db: odcdb
+postgres_user: "odc"
+postgres_password: "odc123"
+postgres_db: "odcdb"
 backend_image: "madicke12/backend:v1"
 frontend_image: "madicke12/front:final"
 front_domain_name: "frontend.local"
