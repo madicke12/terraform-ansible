@@ -2,49 +2,18 @@ pipeline {
   agent any
   stages {
 
-    stage('Terraform Init') {
+    stage('run ansible playbook') {
       steps {
         sh '''
-          terraform init
+          ansible-playbook playbook.yaml -i inventory.ini
         '''
       }
     }
-    stage('Terraform Plan') {
-      steps {
-        sh '''
-          terraform plan
-        '''
-      }
-    }
-    stage('Terraform Apply') {
-      steps {
-        sh '''
-          terraform apply -auto-approve
-        '''
-      }
-    }
+    
   }
   environment{
      PATH = "/usr/local/bin:$PATH"
      email = "cissemadicke8@gmail.com"
   }
-  post {
-            failure {
-                emailext(
-                    subject: "${JOB_NAME}.${BUILD_NUMBER} FAILED",
-                    mimeType: 'text/html',
-                    to: "$email",
-                    body: "${JOB_NAME}.${BUILD_NUMBER} FAILED"
-                )
-            }
-            success {
-                emailext(
-                    subject: "${JOB_NAME}.${BUILD_NUMBER} PASSED",
-                    mimeType: 'text/html',
-                    to: "$email",
-                    body: "${JOB_NAME}.${BUILD_NUMBER} PASSED"
-                )
-            }
-    }
 }
 
