@@ -7,7 +7,7 @@
     - ../secrets/k8s-secrets.yaml
 
   roles:
-    - namespace
+  
     - postgres
     - backend
     - frontend
