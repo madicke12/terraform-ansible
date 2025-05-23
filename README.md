@@ -1,25 +1,34 @@
-# Kubernetes Deployment Automation with Terraform & Ansible
+# Kubernetes Application Deployment Automation with Ansible
 
-This project provides a complete automation pipeline for deploying a Kubernetes-based application stack using [Terraform](https://www.terraform.io/) and [Ansible](https://www.ansible.com/). It provisions a Kubernetes namespace, applies application manifests (backend, frontend, PostgreSQL, services, ingress), and manages secrets, all orchestrated via infrastructure-as-code and configuration management best practices.
+This project demonstrates a complete workflow for deploying a multi-component application (backend, frontend, PostgreSQL) on Kubernetes using [Ansible](https://www.ansible.com/) for configuration management. It also includes a Jenkins pipeline for CI/CD automation and a secure approach to secrets management.
 
 ---
 
 ## Table of Contents
 
+- [Overview](#overview)
 - [Project Structure](#project-structure)
 - [Features](#features)
 - [Prerequisites](#prerequisites)
-- [Setup & Usage](#setup--usage)
+- [Getting Started](#getting-started)
   - [1. Clone the Repository](#1-clone-the-repository)
   - [2. Configure Variables](#2-configure-variables)
-  - [3. Initialize and Apply Terraform](#3-initialize-and-apply-terraform)
-  - [4. Ansible Playbook](#4-ansible-playbook)
-  - [5. Jenkins Pipeline (Optional)](#5-jenkins-pipeline-optional)
+  - [3. Run the Ansible Playbook](#3-run-the-ansible-playbook)
+  - [4. Jenkins Pipeline (Optional)](#4-jenkins-pipeline-optional)
 - [Secrets Management](#secrets-management)
 - [Cleaning Up](#cleaning-up)
-- [Project Details](#project-details)
 - [License](#license)
 - [Contact](#contact)
+
+---
+
+## Overview
+
+This repository provides a reproducible, automated solution for deploying a Kubernetes namespace and application stack. It leverages:
+
+- **Ansible** to apply Kubernetes manifests for backend, frontend, PostgreSQL, services, and ingress.
+- **Jenkins** for CI/CD pipeline automation.
+- **Kubernetes Secrets** for sensitive data management.
 
 ---
 
@@ -48,40 +57,31 @@ This project provides a complete automation pipeline for deploying a Kubernetes-
 │           └── tasks/main.yaml
 ├── secrets/
 │   └── k8s-secret.yaml
-└── terraform/
-    ├── Jenkinsfile
-    ├── main.tf
-    ├── variables.tf
-    ├── .terraform.lock.hcl
-    ├── terraform.tfstate
-    ├── terraform.tfstate.backup
-    └── .terraform/
+└── Jenkinsfile
 ```
 
 ---
 
 ## Features
 
-- **Infrastructure as Code:** Uses Terraform to provision Kubernetes namespaces and trigger configuration management.
-- **Configuration Management:** Uses Ansible to apply Kubernetes manifests and configure application components.
-- **CI/CD Integration:** Includes a Jenkins pipeline for automated deployment and notifications.
-- **Secrets Management:** Supports Kubernetes secrets for sensitive data.
-- **Modular Design:** Separate roles for backend, frontend, and database.
+- **Declarative Application Deployment:** Ansible applies manifests for all application components.
+- **CI/CD Ready:** Jenkins pipeline automates deployment and notifications.
+- **Secure Secrets Handling:** Kubernetes secrets are managed separately.
+- **Modular Roles:** Ansible roles for backend, frontend, and database for easy maintenance.
 
 ---
 
 ## Prerequisites
 
-- [Terraform](https://www.terraform.io/downloads.html) >= 1.2.0
 - [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - Access to a Kubernetes cluster (e.g., [minikube](https://minikube.sigs.k8s.io/docs/))
-- Properly configured `~/.kube/config` with the correct context (default: `minikube`)
+- Properly configured `~/.kube/config`
 - [Jenkins](https://www.jenkins.io/) (optional, for CI/CD)
 
 ---
 
-## Setup & Usage
+## Getting Started
 
 ### 1. Clone the Repository
 
@@ -92,83 +92,50 @@ cd terraform-ansible
 
 ### 2. Configure Variables
 
-Edit [`terraform/variables.tf`](terraform/variables.tf) to set your desired namespace and other variables.
+Edit `ansible/group_vars/all.yaml` to set your desired variables.
 
-### 3. Initialize and Apply Terraform
-
-```sh
-cd terraform
-terraform init
-terraform plan
-terraform apply -auto-approve
-```
-
-- **What happens:**  
-  - Provisions the Kubernetes namespace.
-  - Triggers the Ansible playbook to apply manifests and configure components.
-
-### 4. Ansible Playbook
-
-The playbook [`ansible/playbook.yaml`](ansible/playbook.yaml) is executed automatically by Terraform using a `local-exec` provisioner (see [`main.tf`](terraform/main.tf)).  
-You can also run it manually:
+### 3. Run the Ansible Playbook
 
 ```sh
 cd ansible
 ansible-playbook playbook.yaml -i inventory.ini
 ```
 
-### 5. Jenkins Pipeline (Optional)
+This will:
+- Create the Kubernetes namespace (if not already present).
+- Deploy backend, frontend, PostgreSQL, services, and ingress resources.
 
-A Jenkins pipeline is provided in [`terraform/Jenkinsfile`](terraform/Jenkinsfile):
+### 4. Jenkins Pipeline (Optional)
 
-- **Stages:**  
-  - `Terraform Init`
-  - `Terraform Plan`
-  - `Terraform Apply`
-- **Notifications:**  
-  - Sends email on build success or failure.
-
-To use, configure your Jenkins job to use this Jenkinsfile.
+A Jenkins pipeline is provided in `Jenkinsfile` for CI/CD automation.  
+Configure your Jenkins job to use this file for automated deployments and notifications.
 
 ---
 
 ## Secrets Management
 
-Sensitive data (e.g., database passwords) should be stored in [`secrets/k8s-secret.yaml`](secrets/k8s-secret.yaml).  
+Sensitive data (like database passwords) should be stored in `secrets/k8s-secret.yaml`.  
 **Do not commit real secrets to version control.**  
-Update this file as needed and ensure it is referenced in your manifests.
+Update this file as needed and reference it in your Kubernetes manifests.
 
 ---
 
 ## Cleaning Up
 
-To destroy all resources created by Terraform:
+To remove deployed resources, you can delete the manifests using `kubectl`:
 
 ```sh
-cd terraform
-terraform destroy
+kubectl delete -f ansible/manifests/
+kubectl delete -f secrets/k8s-secret.yaml
 ```
 
----
-
-## Project Details
-
-- **Terraform:**  
-  - Provisions Kubernetes namespace ([`main.tf`](terraform/main.tf))
-  - Triggers Ansible playbook after namespace creation
-
-- **Ansible:**  
-  - Applies manifests for backend, frontend, PostgreSQL, services, and ingress ([`ansible/manifests/`](ansible/manifests/))
-  - Uses roles for modular configuration ([`ansible/roles/`](ansible/roles/))
-
-- **Jenkins:**  
-  - Automates deployment pipeline ([`Jenkinsfile`](terraform/Jenkinsfile))
+Or use Ansible with a teardown playbook if provided.
 
 ---
 
 ## License
 
-MIT License. See LICENSE for details.
+MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
