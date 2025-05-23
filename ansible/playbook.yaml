@@ -12,6 +12,16 @@
     - frontend
 
   tasks:
+    - name: Créer le namespace
+      kubernetes.core.k8s:
+        kubeconfig: ~/.kube/config
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: "{{ k8s_namespace }}"
+            
     - name: Déployer les services (backend et frontend)
       kubernetes.core.k8s:
         kubeconfig: ~/.kube/config

@@ -1,4 +1,4 @@
-namespace_: fullstack-app
+k8s_namespace: fullstack-app
 postgres_user: "odc"
 postgres_password: "odc123"
 postgres_db: "odcdb"
